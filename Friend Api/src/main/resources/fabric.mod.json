@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "friend_api",
+  "version": "${version}",
+  "name": "Friend Api",
+  "description": "This is a utility mod other mods can use to manage player friends.",
+  "authors": [
+    "SmushyTaco"
+  ],
+  "contact": {
+    "homepage": "https://www.smushytaco.com/",
+    "issues": "https://www.curseforge.com/minecraft/mc-mods/friend-api/issues/",
+    "sources": "https://github.com/SmushyTaco/Friend-Api/"
+  },
+  "license": "GNU Lesser General Public License version 3 (LGPLv3)",
+  "icon": "assets/friend_api/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "com.smushytaco.friend_api.FriendApiClient"
+      }
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${fabricloader}",
+    "fabric-api": ">=${fabric_api}",
+    "fabric-language-kotlin": ">=${fabric_language_kotlin}",
+    "minecraft": ">=${minecraft}",
+    "java": ">=${java}"
+  }
+}
