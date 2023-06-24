@@ -2,7 +2,7 @@
 CurseForge: https://www.curseforge.com/minecraft/mc-mods/friend-api/
 
 Modrinth: https://modrinth.com/mod/friend-api/
-
+## Usage
 To use the API you can include it in your project like so:
 
 build.gradle.kts
