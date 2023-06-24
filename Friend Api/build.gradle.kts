@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm").version(System.getProperty("kotlin_version"))
     kotlin("plugin.serialization").version(System.getProperty("kotlin_version"))
     id("com.github.johnrengelman.shadow").version(System.getProperty("shadow_version"))
+    `maven-publish`
 }
 base { archivesName.set(project.extra["archives_base_name"] as String) }
 version = project.extra["mod_version"] as String
@@ -15,6 +16,14 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api", "fabric-api", project.extra["fabric_version"] as String)
     modImplementation("net.fabricmc", "fabric-language-kotlin", project.extra["fabric_language_kotlin_version"] as String)
     shadow(implementation("com.squareup.okhttp3", "okhttp", project.extra["okhttp_version"] as String))
+}
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifactId = base.archivesName.get()
+        }
+    }
 }
 tasks {
     val javaVersion = JavaVersion.toVersion((project.extra["java_version"] as String).toInt())
