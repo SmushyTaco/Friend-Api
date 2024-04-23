@@ -1,8 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("fabric-loom")
-    kotlin("jvm").version(System.getProperty("kotlin_version"))
-    kotlin("plugin.serialization").version(System.getProperty("kotlin_version"))
-    id("com.github.johnrengelman.shadow").version(System.getProperty("shadow_version"))
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("com.github.johnrengelman.shadow")
     `maven-publish`
 }
 base { archivesName.set(project.extra["archives_base_name"] as String) }
@@ -27,13 +28,16 @@ publishing {
 }
 tasks {
     val javaVersion = JavaVersion.toVersion((project.extra["java_version"] as String).toInt())
-    withType<JavaCompile> {
+    withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
         sourceCompatibility = javaVersion.toString()
         targetCompatibility = javaVersion.toString()
         options.release.set(javaVersion.toString().toInt())
     }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> { kotlinOptions { jvmTarget = javaVersion.toString() } }
+    withType<JavaExec>().configureEach { defaultCharacterEncoding = "UTF-8" }
+    withType<Javadoc>().configureEach { options.encoding = "UTF-8" }
+    withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
+    withType<KotlinCompile>().configureEach { kotlinOptions { jvmTarget = javaVersion.toString() } }
     jar {
         from("LICENSE") { rename { "${it}_${base.archivesName.get()}" } }
         archiveClassifier.set("dev")
