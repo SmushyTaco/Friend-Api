@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("fabric-loom")
@@ -37,7 +38,7 @@ tasks {
     withType<JavaExec>().configureEach { defaultCharacterEncoding = "UTF-8" }
     withType<Javadoc>().configureEach { options.encoding = "UTF-8" }
     withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
-    withType<KotlinCompile>().configureEach { kotlinOptions { jvmTarget = javaVersion.toString() } }
+    withType<KotlinCompile>().configureEach { compilerOptions { jvmTarget.set(JvmTarget.valueOf("JVM_$javaVersion")) } }
     jar {
         from("LICENSE") { rename { "${it}_${base.archivesName.get()}" } }
         archiveClassifier.set("dev")
