@@ -7,10 +7,9 @@ plugins {
     id("com.github.johnrengelman.shadow")
     `maven-publish`
 }
-base { archivesName.set(project.extra["archives_base_name"] as String) }
+base.archivesName = project.extra["archives_base_name"] as String
 version = project.extra["mod_version"] as String
 group = project.extra["maven_group"] as String
-repositories {}
 dependencies {
     minecraft("com.mojang", "minecraft", project.extra["minecraft_version"] as String)
     mappings("net.fabricmc", "yarn", project.extra["yarn_mappings"] as String, null, "v2")
@@ -33,33 +32,33 @@ tasks {
         options.encoding = "UTF-8"
         sourceCompatibility = javaVersion.toString()
         targetCompatibility = javaVersion.toString()
-        options.release.set(javaVersion.toString().toInt())
+        options.release = javaVersion.toString().toInt()
     }
     withType<JavaExec>().configureEach { defaultCharacterEncoding = "UTF-8" }
     withType<Javadoc>().configureEach { options.encoding = "UTF-8" }
     withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
-    withType<KotlinCompile>().configureEach { compilerOptions { jvmTarget.set(JvmTarget.valueOf("JVM_$javaVersion")) } }
+    withType<KotlinCompile>().configureEach { compilerOptions { jvmTarget = JvmTarget.valueOf("JVM_$javaVersion") } }
     jar {
         from("LICENSE") { rename { "${it}_${base.archivesName.get()}" } }
-        archiveClassifier.set("dev")
+        archiveClassifier = "dev"
     }
     processResources {
         filesMatching("fabric.mod.json") { expand(mutableMapOf("version" to project.extra["mod_version"] as String, "fabricloader" to project.extra["loader_version"] as String, "fabric_api" to project.extra["fabric_version"] as String, "fabric_language_kotlin" to project.extra["fabric_language_kotlin_version"] as String, "minecraft" to project.extra["minecraft_version"] as String, "java" to project.extra["java_version"] as String)) }
         filesMatching("*.mixins.json") { expand(mutableMapOf("java" to project.extra["java_version"] as String)) }
     }
     java {
-        toolchain { languageVersion.set(JavaLanguageVersion.of(javaVersion.toString())) }
+        toolchain { languageVersion = JavaLanguageVersion.of(javaVersion.toString()) }
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
         withSourcesJar()
     }
     shadowJar {
-        archiveClassifier.set("dev")
+        archiveClassifier = "dev"
         configurations = listOf(project.configurations.shadow.get())
         relocate("okhttp3", "${project.group.toString().lowercase()}.${base.archivesName.get().lowercase().replace('-', '_')}.shaded.okhttp3")
     }
     remapJar {
         dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
+        inputFile = shadowJar.get().archiveFile
     }
 }
