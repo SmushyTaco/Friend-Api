@@ -10,7 +10,7 @@ object UsernameSuggestionProvider: SuggestionProvider<CommandSource> {
         val playerList = context.source.playerNames
         val friendListUsernames = FriendApiClient.getCopyOfFriendsList().map { it.name.lowercase() }
         playerList.removeIf { it.lowercase() in friendListUsernames }
-        for (playerName in playerList) if (playerName.contains(context.input.split(" ").last(), true)) builder.suggest(playerName)
+        for (playerName in playerList) if (playerName.contains(context.input.split(' ').last(), true)) builder.suggest(playerName)
         return builder.buildFuture()
     }
 }

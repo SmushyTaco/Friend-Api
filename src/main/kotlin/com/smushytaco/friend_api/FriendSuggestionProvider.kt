@@ -7,7 +7,7 @@ import net.minecraft.command.CommandSource
 import java.util.concurrent.CompletableFuture
 object FriendSuggestionProvider: SuggestionProvider<CommandSource> {
     override fun getSuggestions(context: CommandContext<CommandSource>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
-        for (friendEntry in FriendApiClient.getCopyOfFriendsList()) if (friendEntry.name.contains(context.input.split(" ").last(), true)) builder.suggest(friendEntry.name)
+        for (friendEntry in FriendApiClient.getCopyOfFriendsList()) if (friendEntry.name.contains(context.input.split(' ').last(), true)) builder.suggest(friendEntry.name)
         return builder.buildFuture()
     }
 }
