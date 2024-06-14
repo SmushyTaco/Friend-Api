@@ -37,7 +37,7 @@ tasks {
     withType<JavaExec>().configureEach { defaultCharacterEncoding = "UTF-8" }
     withType<Javadoc>().configureEach { options.encoding = "UTF-8" }
     withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
-    withType<KotlinCompile>().configureEach { compilerOptions { jvmTarget = JvmTarget.valueOf("JVM_$javaVersion") } }
+    withType<KotlinCompile>().configureEach { compilerOptions.jvmTarget = JvmTarget.valueOf("JVM_$javaVersion") }
     jar {
         from("LICENSE") { rename { "${it}_${base.archivesName.get()}" } }
         archiveClassifier = "dev"
@@ -47,7 +47,7 @@ tasks {
         filesMatching("*.mixins.json") { expand(mutableMapOf("java" to project.extra["java_version"] as String)) }
     }
     java {
-        toolchain { languageVersion = JavaLanguageVersion.of(javaVersion.toString()) }
+        toolchain.languageVersion = JavaLanguageVersion.of(javaVersion.toString())
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
         withSourcesJar()
