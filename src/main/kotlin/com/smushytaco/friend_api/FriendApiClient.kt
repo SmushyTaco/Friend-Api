@@ -55,20 +55,20 @@ object FriendApiClient : ClientModInitializer {
     @Suppress("UNUSED")
     fun getFriend(nameAndUUID: NameAndUUID) = friends.find { it == nameAndUUID }
     @Suppress("UNUSED")
-    fun containsFriend(username: String) = friends.find { it.name.equals(username, true) } != null
+    fun containsFriend(username: String) = friends.any { it.name.equals(username, true) }
     @Suppress("UNUSED")
-    fun containsFriend(uuid: UUID) = friends.find { it.id == uuid } != null
+    fun containsFriend(uuid: UUID) = friends.any { it.id == uuid }
     @Suppress("UNUSED")
-    fun containsFriend(nameAndUUID: NameAndUUID) = friends.find { it == nameAndUUID } != null
+    fun containsFriend(nameAndUUID: NameAndUUID) = friends.any { it == nameAndUUID }
     private fun addFriend(username: String): Boolean? {
-        if (friends.find { it.name.equals(username, true) } != null) return false
+        if (friends.any { it.name.equals(username, true) }) return false
         val nameAndUUID = MojangApiParser.getUuid(username) ?: return null
         friends.add(nameAndUUID)
         writeFriendsToFile()
         return true
     }
     private fun addFriend(uuid: UUID): Boolean? {
-        if (friends.find { it.id == uuid } != null) return false
+        if (friends.any { it.id == uuid }) return false
         val nameAndUUID = MojangApiParser.getUsername(uuid) ?: return null
         friends.add(nameAndUUID)
         writeFriendsToFile()
@@ -134,7 +134,7 @@ object FriendApiClient : ClientModInitializer {
                 clientPlayerEntity.sendMessage(Text.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
                 return@thread
             }
-            clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"))
+            clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
         }
     }
     override fun onInitializeClient() {
@@ -149,8 +149,8 @@ object FriendApiClient : ClientModInitializer {
                         it.source.player.sendMessage(Text.literal("§4You currently have no friends on your friend list."), true)
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.sendMessage(Text.literal("§3Showing friend list:"))
-                    for (index in friends.indices) it.source.player.sendMessage(Text.literal("§3${index + 1}. ").append(Text.literal("§3${friends[index].name}").copySupport(friends[index].name, Text.literal("§3Click to copy the username §b${friends[index].name}§3!"))).append(Text.literal(" ")).append(Text.literal("§b[UUID]").copySupport(friends[index].id.toString(), Text.literal("§3Click to copy the §bUUID§3!"))).append(Text.literal(" ")).append(Text.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Text.literal("§3Click to remove the friend §b${friends[index].name}§3!"))))
+                    it.source.player.sendMessage(Text.literal("§3Showing friend list:"), false)
+                    for (index in friends.indices) it.source.player.sendMessage(Text.literal("§3${index + 1}. ").append(Text.literal("§3${friends[index].name}").copySupport(friends[index].name, Text.literal("§3Click to copy the username §b${friends[index].name}§3!"))).append(Text.literal(" ")).append(Text.literal("§b[UUID]").copySupport(friends[index].id.toString(), Text.literal("§3Click to copy the §bUUID§3!"))).append(Text.literal(" ")).append(Text.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Text.literal("§3Click to remove the friend §b${friends[index].name}§3!"))), false)
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("add")
@@ -178,7 +178,7 @@ object FriendApiClient : ClientModInitializer {
                                 it.source.player.sendMessage(Text.literal("§c${uuid ?: username} §4isn't on your friend list!"), true)
                                 return@executes Command.SINGLE_SUCCESS
                             }
-                            it.source.player.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"))
+                            it.source.player.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"), false)
                             return@executes Command.SINGLE_SUCCESS
                         }))
                 .then(literal("clear").executes {
@@ -187,13 +187,13 @@ object FriendApiClient : ClientModInitializer {
                         it.source.player.sendMessage(Text.literal("§4You currently have no friends on your friend list to clear."), true)
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.sendMessage(Text.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"))
+                    it.source.player.sendMessage(Text.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"), false)
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("update").executes {
                     thread {
                         updateFriendsList()
-                        it.source.player.sendMessage(Text.literal("§3Your friend list has been checked and updated accordingly!"))
+                        it.source.player.sendMessage(Text.literal("§3Your friend list has been checked and updated accordingly!"), false)
                     }
                     return@executes Command.SINGLE_SUCCESS
                 }))
