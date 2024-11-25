@@ -4,7 +4,7 @@ plugins {
     id("fabric-loom")
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("com.github.johnrengelman.shadow")
+    id("com.gradleup.shadow")
     `maven-publish`
 }
 base.archivesName = project.extra["archives_base_name"] as String
