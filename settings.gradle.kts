@@ -9,6 +9,6 @@ pluginManagement {
         id("fabric-loom").version(settings.extra["loom_version"] as String)
         kotlin("jvm").version(settings.extra["kotlin_version"] as String)
         kotlin("plugin.serialization").version(settings.extra["kotlin_version"] as String)
-        id("com.github.johnrengelman.shadow").version(settings.extra["shadow_version"] as String)
+        id("com.gradleup.shadow").version(settings.extra["shadow_version"] as String)
     }
 }

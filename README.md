@@ -17,5 +17,5 @@ dependencies {
 gradle.properties
 ```properties
 # Check this on https://github.com/SmushyTaco/Friend-Api/releases/latest/
-friend_api_version = 1.0.5
+friend_api_version = 1.0.6
 ```
