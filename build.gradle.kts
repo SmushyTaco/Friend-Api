@@ -37,7 +37,12 @@ tasks {
     withType<JavaExec>().configureEach { defaultCharacterEncoding = "UTF-8" }
     withType<Javadoc>().configureEach { options.encoding = "UTF-8" }
     withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
-    withType<KotlinCompile>().configureEach { compilerOptions.jvmTarget = JvmTarget.valueOf("JVM_$javaVersion") }
+    withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            extraWarnings = true
+            jvmTarget = JvmTarget.valueOf("JVM_$javaVersion")
+        }
+    }
     jar {
         from("LICENSE") { rename { "${it}_${base.archivesName.get()}" } }
         archiveClassifier = "dev"
