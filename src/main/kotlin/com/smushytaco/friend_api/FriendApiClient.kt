@@ -36,11 +36,11 @@ import kotlin.concurrent.thread
 @Environment(EnvType.CLIENT)
 object FriendApiClient : ClientModInitializer {
     private fun MutableText.copySupport(copyString: String, hoverText: Text): MutableText {
-        style = style.withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyString)).withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+        style = style.withClickEvent(ClickEvent.CopyToClipboard(copyString)).withHoverEvent(HoverEvent.ShowText(hoverText))
         return this
     }
     private fun MutableText.commandSupport(commandString: String, hoverText: Text): MutableText {
-        style = style.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, commandString)).withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+        style = style.withClickEvent(ClickEvent.RunCommand(commandString)).withHoverEvent(HoverEvent.ShowText(hoverText))
         return this
     }
     private val filePath = FabricLoader.getInstance().configDir.resolve("friend_api.json")
@@ -130,7 +130,7 @@ object FriendApiClient : ClientModInitializer {
             if (successStatus == null) {
                 clientPlayerEntity.sendMessage(Text.literal("§c${uuid ?: username} §4does not exist!"), true)
                 return@thread
-            } else if (successStatus == false) {
+            } else if (!successStatus) {
                 clientPlayerEntity.sendMessage(Text.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
                 return@thread
             }

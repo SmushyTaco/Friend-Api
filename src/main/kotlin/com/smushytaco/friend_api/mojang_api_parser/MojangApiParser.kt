@@ -9,12 +9,12 @@ object MojangApiParser {
     private fun executeRequestForGets(request: Request): NameAndUUID? {
         return try {
             client.newCall(request).execute().use { response -> response.body?.string()?.let { json.decodeFromString(NameAndUUID.serializer(), it) } }
-        } catch (e: Exception) { null }
+        } catch (_: Exception) { null }
     }
     private fun executeRequestForChecks(request: Request): Boolean {
         return try {
             client.newCall(request).execute().use { response -> response.isSuccessful }
-        } catch (e: Exception) { false }
+        } catch (_: Exception) { false }
     }
     fun getUuid(name: String): NameAndUUID? {
         val request = Request.Builder().url("https://api.mojang.com/users/profiles/minecraft/$name/").build()
