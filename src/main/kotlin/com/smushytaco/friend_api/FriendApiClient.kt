@@ -27,6 +27,7 @@ import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.hit.HitResult
 import org.lwjgl.glfw.GLFW
@@ -46,7 +47,7 @@ object FriendApiClient : ClientModInitializer {
     private val filePath = FabricLoader.getInstance().configDir.resolve("friend_api.json")
     private val friends = arrayListOf<NameAndUUID>()
     private const val MOD_ID = "friend_api"
-    private val KEYBINDING = KeyBinding("key.$MOD_ID.$MOD_ID", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, "category.$MOD_ID.$MOD_ID")
+    private val KEYBINDING = KeyBinding("key.$MOD_ID.$MOD_ID", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyBinding.Category.create(Identifier.of(MOD_ID, "category")))
     fun getCopyOfFriendsList() = friends.toTypedArray()
     @Suppress("UNUSED")
     fun getFriend(username: String) = friends.find { it.name.equals(username, true) }
@@ -210,7 +211,7 @@ object FriendApiClient : ClientModInitializer {
         })
     }
     private fun target(client: MinecraftClient, range: Double = 250.0, tickDelta: Float = 1.0F): HitResult? {
-        val clientCameraEntity = client.getCameraEntity() ?: return null
+        val clientCameraEntity = client.cameraEntity ?: return null
         var hitResult = clientCameraEntity.raycast(range, tickDelta, false)
         val rotationVector = clientCameraEntity.getRotationVec(1.0F)
         val positionVector = clientCameraEntity.getCameraPosVec(tickDelta)
