@@ -1,17 +1,24 @@
-rootProject.name = settings.extra["archives_base_name"] as String
+val archivesBaseName = providers.gradleProperty("archives_base_name")
+rootProject.name = archivesBaseName.get()
 pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net") { name = "Fabric" }
         mavenCentral()
         gradlePluginPortal()
     }
+    val loomVersion = providers.gradleProperty("loom_version")
+    val kotlinVersion = providers.gradleProperty("kotlin_version")
+    val shadowVersion = providers.gradleProperty("shadow_version")
+    val minotaurVersion = providers.gradleProperty("minotaur_version")
+    val curseforgeGradleVersion = providers.gradleProperty("curseforge_gradle_version")
+    val dotenvVersion = providers.gradleProperty("dotenv_version")
     plugins {
-        id("fabric-loom").version(settings.extra["loom_version"] as String)
-        kotlin("jvm").version(settings.extra["kotlin_version"] as String)
-        kotlin("plugin.serialization").version(settings.extra["kotlin_version"] as String)
-        id("com.gradleup.shadow").version(settings.extra["shadow_version"] as String)
-        id("com.modrinth.minotaur").version(settings.extra["minotaur_version"] as String)
-        id("net.darkhax.curseforgegradle").version(settings.extra["curseforge_gradle_version"] as String)
-        id("co.uzzu.dotenv.gradle").version(settings.extra["dotenv_version"] as String)
+        id("fabric-loom").version(loomVersion.get())
+        kotlin("jvm").version(kotlinVersion.get())
+        kotlin("plugin.serialization").version(kotlinVersion.get())
+        id("com.gradleup.shadow").version(shadowVersion.get())
+        id("com.modrinth.minotaur").version(minotaurVersion.get())
+        id("net.darkhax.curseforgegradle").version(curseforgeGradleVersion.get())
+        id("co.uzzu.dotenv.gradle").version(dotenvVersion.get())
     }
 }
