@@ -1,3 +1,5 @@
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -9,8 +11,8 @@ plugins {
     id("com.modrinth.minotaur")
     id("net.darkhax.curseforgegradle")
     id("co.uzzu.dotenv.gradle")
-    `maven-publish`
 }
+pluginManager.apply("maven-publish")
 val archivesBaseName = providers.gradleProperty("archives_base_name")
 val modVersion = providers.gradleProperty("mod_version")
 val mavenGroup = providers.gradleProperty("maven_group")
@@ -32,7 +34,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${fabricLanguageKotlinVersion.get()}")
     shadow(implementation("com.squareup.okhttp3:okhttp:${okhttpVersion.get()}")!!)
 }
-publishing {
+extensions.configure<PublishingExtension> {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
