@@ -7,11 +7,12 @@ To use the API you can include it in your project like so:
 
 build.gradle.kts
 ```kotlin
+val friendApiVersion = providers.gradleProperty("friend_api_version")
 repositories {
     maven("https://jitpack.io")
 }
 dependencies {
-    modImplementation("com.github.SmushyTaco", "Friend-Api", project.extra["friend_api_version"] as String)
+    modImplementation("com.github.SmushyTaco:Friend-Api:${friendApiVersion.get()}")
 }
 ```
 gradle.properties
