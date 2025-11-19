@@ -31,3 +31,5 @@ replay_*.log
 .PVS-Studio/
 # Security
 .env
+# Publishing
+private-key.asc

@@ -5,18 +5,21 @@ Modrinth: https://modrinth.com/mod/friend-api/
 ## Usage
 To use the API you can include it in your project like so:
 
-build.gradle.kts
+build.gradle.kts:
 ```kotlin
-val friendApiVersion = providers.gradleProperty("friend_api_version")
 repositories {
-    maven("https://jitpack.io")
+    mavenCentral()
 }
 dependencies {
-    modImplementation("com.github.SmushyTaco:Friend-Api:${friendApiVersion.get()}")
+    modImplementation(libs.friendApi)
 }
 ```
-gradle.properties
-```properties
-# Check this on https://github.com/SmushyTaco/Friend-Api/releases/latest/
-friend_api_version = 1.0.13
+libs.versions.toml:
+```toml
+[versions]
+# Check this on https://central.sonatype.com/artifact/com.smushytaco/friend-api/
+friendApi = "1.0.14"
+
+[libraries]
+friendApi = { group = "com.smushytaco", name = "friend-api", version.ref = "friendApi" }
 ```
