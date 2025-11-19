@@ -99,7 +99,7 @@ tasks {
     register<Jar>("dokkaJar") {
         group = JavaBasePlugin.DOCUMENTATION_GROUP
         dependsOn(dokkaGenerateHtml)
-        archiveClassifier = "dokka"
+        archiveClassifier = "javadoc"
         from(layout.buildDirectory.dir("dokka/html"))
     }
     named("build") { dependsOn(named("dokkaJar")) }
