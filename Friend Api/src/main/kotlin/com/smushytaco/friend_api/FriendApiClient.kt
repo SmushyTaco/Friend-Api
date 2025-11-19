@@ -193,6 +193,7 @@ object FriendApiClient : ClientModInitializer {
         writeFriendsToFile()
     }
     private fun addFriendWithPlayerOutput(username: String, clientPlayerEntity: ClientPlayerEntity) {
+        val minecraftClient = MinecraftClient.getInstance()
         thread {
             var uuid: UUID? = null
             try {
@@ -200,13 +201,19 @@ object FriendApiClient : ClientModInitializer {
             } catch (_: Exception) {}
             val successStatus = uuid?.let { id -> addFriend(id) } ?: addFriend(username)
             if (successStatus == null) {
-                clientPlayerEntity.sendMessage(Text.literal("§c${uuid ?: username} §4does not exist!"), true)
+                minecraftClient.execute {
+                    clientPlayerEntity.sendMessage(Text.literal("§c${uuid ?: username} §4does not exist!"), true)
+                }
                 return@thread
             } else if (!successStatus) {
-                clientPlayerEntity.sendMessage(Text.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
+                minecraftClient.execute {
+                    clientPlayerEntity.sendMessage(Text.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
+                }
                 return@thread
             }
-            clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
+            minecraftClient.execute {
+                clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
+            }
         }
     }
     /**
@@ -270,9 +277,12 @@ object FriendApiClient : ClientModInitializer {
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("update").executes {
+                    val minecraftClient = MinecraftClient.getInstance()
                     thread {
                         updateFriendsList()
-                        it.source.player.sendMessage(Text.literal("§3Your friend list has been checked and updated accordingly!"), false)
+                        minecraftClient.execute {
+                            it.source.player.sendMessage(Text.literal("§3Your friend list has been checked and updated accordingly!"), false)
+                        }
                     }
                     return@executes Command.SINGLE_SUCCESS
                 }))

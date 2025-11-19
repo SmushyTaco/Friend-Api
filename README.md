@@ -21,7 +21,7 @@ libs.versions.toml:
 ```toml
 [versions]
 # Check this on https://central.sonatype.com/artifact/com.smushytaco/friend-api/
-friendApi = "1.0.14"
+friendApi = "1.0.15"
 
 [libraries]
 friendApi = { group = "com.smushytaco", name = "friend-api", version.ref = "friendApi" }
