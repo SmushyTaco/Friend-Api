@@ -1,4 +1,7 @@
 # Friend Api
+[![Maven Central](https://img.shields.io/maven-central/v/com.smushytaco/friend-api.svg?label=maven%20central)](https://central.sonatype.com/artifact/com.smushytaco/friend-api)
+[![Dokka Docs](https://img.shields.io/badge/docs-dokka-brightgreen.svg)](https://smushytaco.github.io/Friend-Api)
+
 CurseForge: https://www.curseforge.com/minecraft/mc-mods/friend-api/
 
 Modrinth: https://modrinth.com/mod/friend-api/
