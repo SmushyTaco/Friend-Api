@@ -23,7 +23,27 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.util.*
 
+/**
+ * A custom Kotlinx Serialization serializer for Mojang-style UUID strings.
+ *
+ * Mojang's APIs use a compact UUID format (32 hexadecimal characters without
+ * hyphens). This serializer ensures UUIDs are encoded in that format and
+ * decoded back into standard Java UUID objects.
+ *
+ * Also provides a helper method to convert compact or hyphenated UUID strings
+ * into valid [UUID] instances.
+ */
 object UUIDSerializer : KSerializer<UUID> {
+    /**
+     * Converts a compact (no-hyphen) or hyphenated UUID string into a
+     * standard Java [UUID] by inserting hyphens at the correct positions.
+     *
+     * Mojang API responses may return UUIDs without hyphens; this helper
+     * produces a valid, parseable UUID.
+     *
+     * @param uuidString the raw UUID string to convert
+     * @return the resulting [UUID]
+     */
     fun stringToUUID(uuidString: String): UUID {
         val stringBuilder = StringBuilder()
         val string = uuidString.replace("-", "")
@@ -33,7 +53,23 @@ object UUIDSerializer : KSerializer<UUID> {
         }
         return UUID.fromString(stringBuilder.toString())
     }
+    /**
+     * Describes this serializer as a primitive string type, since UUIDs are
+     * encoded and decoded using their string form.
+     */
     override val descriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+    /**
+     * Decodes a compact or hyphenated UUID string into a [UUID].
+     *
+     * @param decoder the decoder providing the raw UUID string
+     * @return a parsed and normalized [UUID] instance
+     */
     override fun deserialize(decoder: Decoder) = stringToUUID(decoder.decodeString())
+    /**
+     * Encodes a [UUID] into Mojang's compact (no-hyphen) 32-character format.
+     *
+     * @param encoder the encoder used to output the serialized UUID string
+     * @param value the UUID to serialize
+     */
     override fun serialize(encoder: Encoder, value: UUID) { encoder.encodeString(value.toString().replace("-", "")) }
 }

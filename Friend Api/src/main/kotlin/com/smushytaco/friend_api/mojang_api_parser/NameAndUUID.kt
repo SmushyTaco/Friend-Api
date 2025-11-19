@@ -19,5 +19,14 @@ package com.smushytaco.friend_api.mojang_api_parser
 import kotlinx.serialization.Serializable
 import java.util.*
 
+/**
+ * Represents a Mojang profile consisting of a Minecraft username and its UUID.
+ *
+ * This class is used as the decoded result of Mojang API calls and is also
+ * serialized to disk as part of the friend list.
+ *
+ * @property name the current Minecraft username associated with the UUID
+ * @property id the UUID of the player, serialized using [UUIDSerializer]
+ */
 @Serializable
 data class NameAndUUID(val name: String, @Serializable(with = UUIDSerializer::class) val id: UUID)

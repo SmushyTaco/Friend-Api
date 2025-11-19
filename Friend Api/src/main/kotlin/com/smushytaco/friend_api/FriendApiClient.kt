@@ -50,6 +50,12 @@ import java.nio.file.Files
 import java.util.*
 import kotlin.concurrent.thread
 
+/**
+ * Client-side entry point for the Friend API mod.
+ *
+ * Keeps track of the local friend list, persists it to disk, and wires up
+ * commands, keybinds, and Mojang API calls used to manage friends.
+ */
 object FriendApiClient : ClientModInitializer {
     private fun MutableText.copySupport(copyString: String, hoverText: Text): MutableText {
         style = style.withClickEvent(ClickEvent.CopyToClipboard(copyString)).withHoverEvent(HoverEvent.ShowText(hoverText))
@@ -63,17 +69,67 @@ object FriendApiClient : ClientModInitializer {
     private val friends = arrayListOf<NameAndUUID>()
     private const val MOD_ID = "friend_api"
     private val KEYBINDING = KeyBinding("key.$MOD_ID.$MOD_ID", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyBinding.Category.create(Identifier.of(MOD_ID, "category")))
+    /**
+     * Returns an immutable snapshot of the current friend list.
+     *
+     * The returned array is a copy; modifying it will not affect the
+     * internally stored list.
+     *
+     * @return an array containing all known friends
+     */
     fun getCopyOfFriendsList() = friends.toTypedArray()
+    /**
+     * Looks up a friend by their Minecraft username.
+     *
+     * The comparison is case-insensitive.
+     *
+     * @param username the username to search for
+     * @return the matching friend entry, or `null` if no friend with that name exists
+     */
     @Suppress("UNUSED")
     fun getFriend(username: String) = friends.find { it.name.equals(username, true) }
+    /**
+     * Looks up a friend by their UUID.
+     *
+     * @param uuid the UUID to search for
+     * @return the matching friend entry, or `null` if no friend with that UUID exists
+     */
     @Suppress("UNUSED")
     fun getFriend(uuid: UUID) = friends.find { it.id == uuid }
+    /**
+     * Looks up a friend by a full friend entry.
+     *
+     * This uses structural equality to find an exact match.
+     *
+     * @param nameAndUUID the friend entry to search for
+     * @return the matching friend entry, or `null` if it is not present
+     */
     @Suppress("UNUSED")
     fun getFriend(nameAndUUID: NameAndUUID) = friends.find { it == nameAndUUID }
+    /**
+     * Checks whether a friend with the given username exists.
+     *
+     * The comparison is case-insensitive.
+     *
+     * @param username the username to check
+     * @return `true` if the friend list contains a friend with this name, otherwise `false`
+     */
     @Suppress("UNUSED")
     fun containsFriend(username: String) = friends.any { it.name.equals(username, true) }
+    /**
+     * Checks whether a friend with the given UUID exists.
+     *
+     * @param uuid the UUID to check
+     * @return `true` if the friend list contains a friend with this UUID, otherwise `false`
+     */
     @Suppress("UNUSED")
     fun containsFriend(uuid: UUID) = friends.any { it.id == uuid }
+    /**
+     * Checks whether the given friend entry is present in the friend list.
+     *
+     * @param nameAndUUID the friend entry to check
+     * @return `true` if this entry is contained in the friend list, otherwise `false`
+     */
     @Suppress("UNUSED")
     fun containsFriend(nameAndUUID: NameAndUUID) = friends.any { it == nameAndUUID }
     private fun addFriend(username: String): Boolean? {
@@ -153,6 +209,13 @@ object FriendApiClient : ClientModInitializer {
             clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
         }
     }
+    /**
+     * Called by Fabric when the client mod is initialized.
+     *
+     * Registers the keybinding and client commands, loads or creates the
+     * friend list file, updates it using Mojang's profile API, and hooks
+     * the client tick event used for the keybind-based friend adding.
+     */
     override fun onInitializeClient() {
         KeyBindingHelper.registerKeyBinding(KEYBINDING)
         if (!Files.exists(filePath)) Files.createFile(filePath)

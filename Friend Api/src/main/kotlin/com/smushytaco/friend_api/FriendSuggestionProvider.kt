@@ -23,7 +23,23 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.minecraft.command.CommandSource
 import java.util.concurrent.CompletableFuture
 
+/**
+ * Suggestion provider for the `/clientfriend remove` command.
+ *
+ * Suggests usernames that are already present in the local friend list and
+ * that match the current input.
+ */
 object FriendSuggestionProvider: SuggestionProvider<CommandSource> {
+    /**
+     * Builds completion suggestions from the current friend list.
+     *
+     * Only friends whose usernames contain the last token of the raw command
+     * input (case-insensitive) are suggested.
+     *
+     * @param context the command context used to access the source and input
+     * @param builder the suggestions builder to populate
+     * @return a future that completes with the built suggestions
+     */
     override fun getSuggestions(context: CommandContext<CommandSource>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
         for (friendEntry in FriendApiClient.getCopyOfFriendsList()) if (friendEntry.name.contains(context.input.split(' ').last(), true)) builder.suggest(friendEntry.name)
         return builder.buildFuture()

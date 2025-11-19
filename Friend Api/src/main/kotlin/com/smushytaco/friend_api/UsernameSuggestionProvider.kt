@@ -23,7 +23,25 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.minecraft.command.CommandSource
 import java.util.concurrent.CompletableFuture
 
+/**
+ * Suggestion provider for the `/clientfriend add` command.
+ *
+ * Suggests online player usernames that are **not already in the friend list**
+ * and that match the user's current input.
+ */
 object UsernameSuggestionProvider: SuggestionProvider<CommandSource> {
+    /**
+     * Generates username suggestions for the `add` subcommand.
+     *
+     * This filters the server's visible player list by:
+     * 1. Removing any usernames already present in the local friend list.
+     * 2. Matching the remaining usernames against the last token typed
+     *    in the command (case-insensitive substring match).
+     *
+     * @param context the command context containing the input and source
+     * @param builder the suggestions builder to populate
+     * @return a future that completes with the constructed suggestions
+     */
     override fun getSuggestions(context: CommandContext<CommandSource>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
         val playerList = context.source.playerNames
         val friendListUsernames = FriendApiClient.getCopyOfFriendsList().map { it.name.lowercase() }
