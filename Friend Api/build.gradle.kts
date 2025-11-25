@@ -37,6 +37,7 @@ val javaVersion = libs.versions.java.map { it.toInt() }
 base.archivesName = archivesBaseName
 version = modVersion.get()
 group = mavenGroup.get()
+description = projectDescription.get()
 val shade by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
