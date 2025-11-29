@@ -20,7 +20,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionProvider
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import net.minecraft.command.CommandSource
+import net.minecraft.commands.SharedSuggestionProvider
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture
  * Suggests usernames that are already present in the local friend list and
  * that match the current input.
  */
-object FriendSuggestionProvider: SuggestionProvider<CommandSource> {
+object FriendSuggestionProvider: SuggestionProvider<SharedSuggestionProvider> {
     /**
      * Builds completion suggestions from the current friend list.
      *
@@ -40,7 +40,7 @@ object FriendSuggestionProvider: SuggestionProvider<CommandSource> {
      * @param builder the suggestions builder to populate
      * @return a future that completes with the built suggestions
      */
-    override fun getSuggestions(context: CommandContext<CommandSource>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
+    override fun getSuggestions(context: CommandContext<SharedSuggestionProvider>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
         for (friendEntry in FriendApiClient.getCopyOfFriendsList()) if (friendEntry.name.contains(context.input.split(' ').last(), true)) builder.suggest(friendEntry.name)
         return builder.buildFuture()
     }

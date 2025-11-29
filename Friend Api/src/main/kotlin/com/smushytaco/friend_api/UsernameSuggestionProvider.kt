@@ -20,7 +20,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionProvider
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import net.minecraft.command.CommandSource
+import net.minecraft.commands.SharedSuggestionProvider
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture
  * Suggests online player usernames that are **not already in the friend list**
  * and that match the user's current input.
  */
-object UsernameSuggestionProvider: SuggestionProvider<CommandSource> {
+object UsernameSuggestionProvider: SuggestionProvider<SharedSuggestionProvider> {
     /**
      * Generates username suggestions for the `add` subcommand.
      *
@@ -42,8 +42,8 @@ object UsernameSuggestionProvider: SuggestionProvider<CommandSource> {
      * @param builder the suggestions builder to populate
      * @return a future that completes with the constructed suggestions
      */
-    override fun getSuggestions(context: CommandContext<CommandSource>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
-        val playerList = context.source.playerNames
+    override fun getSuggestions(context: CommandContext<SharedSuggestionProvider>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
+        val playerList = context.source.onlinePlayerNames
         val friendListUsernames = FriendApiClient.getCopyOfFriendsList().map { it.name.lowercase() }
         playerList.removeIf { it.lowercase() in friendListUsernames }
         for (playerName in playerList) if (playerName.contains(context.input.split(' ').last(), true)) builder.suggest(playerName)

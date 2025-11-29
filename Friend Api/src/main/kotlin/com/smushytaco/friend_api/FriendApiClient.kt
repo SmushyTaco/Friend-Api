@@ -16,6 +16,7 @@
 
 package com.smushytaco.friend_api
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -31,20 +32,19 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.network.ClientPlayerEntity
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
-import net.minecraft.command.CommandSource
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.projectile.ProjectileUtil
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
-import net.minecraft.util.hit.EntityHitResult
-import net.minecraft.util.hit.HitResult
+import net.minecraft.client.KeyMapping
+import net.minecraft.client.Minecraft
+import net.minecraft.client.player.LocalPlayer
+import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.projectile.ProjectileUtil
+import net.minecraft.world.phys.EntityHitResult
+import net.minecraft.world.phys.HitResult
 import org.lwjgl.glfw.GLFW
 import java.nio.file.Files
 import java.util.*
@@ -57,18 +57,19 @@ import kotlin.concurrent.thread
  * commands, keybinds, and Mojang API calls used to manage friends.
  */
 object FriendApiClient : ClientModInitializer {
-    private fun MutableText.copySupport(copyString: String, hoverText: Text): MutableText {
+    private fun MutableComponent.copySupport(copyString: String, hoverText: Component): MutableComponent {
         style = style.withClickEvent(ClickEvent.CopyToClipboard(copyString)).withHoverEvent(HoverEvent.ShowText(hoverText))
         return this
     }
-    private fun MutableText.commandSupport(commandString: String, hoverText: Text): MutableText {
+    private fun MutableComponent.commandSupport(commandString: String, hoverText: Component): MutableComponent {
         style = style.withClickEvent(ClickEvent.RunCommand(commandString)).withHoverEvent(HoverEvent.ShowText(hoverText))
         return this
     }
     private val filePath = FabricLoader.getInstance().configDir.resolve("friend_api.json")
     private val friends = arrayListOf<NameAndUUID>()
     private const val MOD_ID = "friend_api"
-    private val KEYBINDING = KeyBinding("key.$MOD_ID.$MOD_ID", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyBinding.Category.create(Identifier.of(MOD_ID, "category")))
+    private val KEYBINDING = KeyMapping("key.$MOD_ID.$MOD_ID", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyMapping.Category.register(
+        ResourceLocation.fromNamespaceAndPath(MOD_ID, "category")))
     /**
      * Returns an immutable snapshot of the current friend list.
      *
@@ -192,8 +193,8 @@ object FriendApiClient : ClientModInitializer {
         friends.addAll(noDuplicates)
         writeFriendsToFile()
     }
-    private fun addFriendWithPlayerOutput(username: String, clientPlayerEntity: ClientPlayerEntity) {
-        val minecraftClient = MinecraftClient.getInstance()
+    private fun addFriendWithPlayerOutput(username: String, clientPlayerEntity: LocalPlayer) {
+        val minecraftClient = Minecraft.getInstance()
         thread {
             var uuid: UUID? = null
             try {
@@ -202,17 +203,17 @@ object FriendApiClient : ClientModInitializer {
             val successStatus = uuid?.let { id -> addFriend(id) } ?: addFriend(username)
             if (successStatus == null) {
                 minecraftClient.execute {
-                    clientPlayerEntity.sendMessage(Text.literal("§c${uuid ?: username} §4does not exist!"), true)
+                    clientPlayerEntity.displayClientMessage(Component.literal("§c${uuid ?: username} §4does not exist!"), true)
                 }
                 return@thread
             } else if (!successStatus) {
                 minecraftClient.execute {
-                    clientPlayerEntity.sendMessage(Text.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
+                    clientPlayerEntity.displayClientMessage(Component.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
                 }
                 return@thread
             }
             minecraftClient.execute {
-                clientPlayerEntity.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
+                clientPlayerEntity.displayClientMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
             }
         }
     }
@@ -232,18 +233,22 @@ object FriendApiClient : ClientModInitializer {
             val friend = dispatcher.register(literal("clientfriend")
                 .then(literal("list").executes {
                     if (friends.isEmpty()) {
-                        it.source.player.sendMessage(Text.literal("§4You currently have no friends on your friend list."), true)
+                        it.source.player.displayClientMessage(Component.literal("§4You currently have no friends on your friend list."), true)
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.sendMessage(Text.literal("§3Showing friend list:"), false)
-                    for (index in friends.indices) it.source.player.sendMessage(Text.literal("§3${index + 1}. ").append(Text.literal("§3${friends[index].name}").copySupport(friends[index].name, Text.literal("§3Click to copy the username §b${friends[index].name}§3!"))).append(Text.literal(" ")).append(Text.literal("§b[UUID]").copySupport(friends[index].id.toString(), Text.literal("§3Click to copy the §bUUID§3!"))).append(Text.literal(" ")).append(Text.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Text.literal("§3Click to remove the friend §b${friends[index].name}§3!"))), false)
+                    it.source.player.displayClientMessage(Component.literal("§3Showing friend list:"), false)
+                    for (index in friends.indices) it.source.player.displayClientMessage(
+                        Component.literal("§3${index + 1}. ").append(
+                            Component.literal("§3${friends[index].name}").copySupport(friends[index].name, Component.literal("§3Click to copy the username §b${friends[index].name}§3!"))).append(
+                            Component.literal(" ")).append(Component.literal("§b[UUID]").copySupport(friends[index].id.toString(), Component.literal("§3Click to copy the §bUUID§3!"))).append(
+                            Component.literal(" ")).append(Component.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Component.literal("§3Click to remove the friend §b${friends[index].name}§3!"))), false)
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("add")
                     .then(ClientCommandManager.argument("username", StringArgumentType.word())
                         .suggests { context, builder ->
                             @Suppress("UNCHECKED_CAST")
-                            UsernameSuggestionProvider.getSuggestions(context as CommandContext<CommandSource>, builder)
+                            UsernameSuggestionProvider.getSuggestions(context as CommandContext<SharedSuggestionProvider>, builder)
                         }.executes {
                             addFriendWithPlayerOutput(StringArgumentType.getString(it, "username"), it.source.player)
                             return@executes Command.SINGLE_SUCCESS
@@ -252,7 +257,7 @@ object FriendApiClient : ClientModInitializer {
                     .then(ClientCommandManager.argument("username", StringArgumentType.word())
                         .suggests { context, builder ->
                             @Suppress("UNCHECKED_CAST")
-                            FriendSuggestionProvider.getSuggestions(context as CommandContext<CommandSource>, builder)
+                            FriendSuggestionProvider.getSuggestions(context as CommandContext<SharedSuggestionProvider>, builder)
                         }.executes {
                             val username = StringArgumentType.getString(it, "username")
                             var uuid: UUID? = null
@@ -261,27 +266,27 @@ object FriendApiClient : ClientModInitializer {
                             } catch (_: Exception) {}
                             val successStatus = uuid?.let { id -> removeFriend(id) } ?: removeFriend(username)
                             if (!successStatus) {
-                                it.source.player.sendMessage(Text.literal("§c${uuid ?: username} §4isn't on your friend list!"), true)
+                                it.source.player.displayClientMessage(Component.literal("§c${uuid ?: username} §4isn't on your friend list!"), true)
                                 return@executes Command.SINGLE_SUCCESS
                             }
-                            it.source.player.sendMessage(Text.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"), false)
+                            it.source.player.displayClientMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"), false)
                             return@executes Command.SINGLE_SUCCESS
                         }))
                 .then(literal("clear").executes {
                     val clearCount = clearFriendList()
                     if (clearCount == 0) {
-                        it.source.player.sendMessage(Text.literal("§4You currently have no friends on your friend list to clear."), true)
+                        it.source.player.displayClientMessage(Component.literal("§4You currently have no friends on your friend list to clear."), true)
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.sendMessage(Text.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"), false)
+                    it.source.player.displayClientMessage(Component.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"), false)
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("update").executes {
-                    val minecraftClient = MinecraftClient.getInstance()
+                    val minecraftClient = Minecraft.getInstance()
                     thread {
                         updateFriendsList()
                         minecraftClient.execute {
-                            it.source.player.sendMessage(Text.literal("§3Your friend list has been checked and updated accordingly!"), false)
+                            it.source.player.displayClientMessage(Component.literal("§3Your friend list has been checked and updated accordingly!"), false)
                         }
                     }
                     return@executes Command.SINGLE_SUCCESS
@@ -289,25 +294,25 @@ object FriendApiClient : ClientModInitializer {
             dispatcher.register(literal("cf").redirect(friend))
         })
         ClientTickEvents.START_CLIENT_TICK.register(ClientTickEvents.StartTick {
-            while (KEYBINDING.wasPressed()) {
+            while (KEYBINDING.consumeClick()) {
                 val player = it.player ?: return@StartTick
                 val target = target(it) ?: return@StartTick
-                if (target.type != HitResult.Type.ENTITY || target !is EntityHitResult || target.entity !is PlayerEntity) return@StartTick
-                val playerToFriend = target.entity as PlayerEntity
+                if (target.type != HitResult.Type.ENTITY || target !is EntityHitResult || target.entity !is Player) return@StartTick
+                val playerToFriend = target.entity as Player
                 addFriendWithPlayerOutput(playerToFriend.name.string, player)
             }
         })
     }
-    private fun target(client: MinecraftClient, range: Double = 250.0, tickDelta: Float = 1.0F): HitResult? {
+    private fun target(client: Minecraft, range: Double = 250.0, tickDelta: Float = 1.0F): HitResult? {
         val clientCameraEntity = client.cameraEntity ?: return null
-        var hitResult = clientCameraEntity.raycast(range, tickDelta, false)
-        val rotationVector = clientCameraEntity.getRotationVec(1.0F)
-        val positionVector = clientCameraEntity.getCameraPosVec(tickDelta)
-        val box = clientCameraEntity.boundingBox.stretch(rotationVector.multiply(range)).expand(1.0, 1.0, 1.0)
-        val entityHitResult = ProjectileUtil.raycast(clientCameraEntity, positionVector, positionVector.add(rotationVector.x * range, rotationVector.y * range, rotationVector.z * range), box, { !it.isSpectator && it.canHit() }, range * range)
+        var hitResult = clientCameraEntity.pick(range, tickDelta, false)
+        val rotationVector = clientCameraEntity.getViewVector(1.0F)
+        val positionVector = clientCameraEntity.getEyePosition(tickDelta)
+        val box = clientCameraEntity.boundingBox.expandTowards(rotationVector.scale(range)).inflate(1.0, 1.0, 1.0)
+        val entityHitResult = ProjectileUtil.getEntityHitResult(clientCameraEntity, positionVector, positionVector.add(rotationVector.x * range, rotationVector.y * range, rotationVector.z * range), box, { !it.isSpectator && it.isPickable }, range * range)
         if (entityHitResult != null) {
-            val distanceFromEntity = positionVector.squaredDistanceTo(entityHitResult.pos)
-            if (distanceFromEntity < range * range && (hitResult.type == HitResult.Type.MISS || hitResult.type == HitResult.Type.BLOCK && distanceFromEntity < positionVector.squaredDistanceTo(hitResult.pos))) hitResult = entityHitResult
+            val distanceFromEntity = positionVector.distanceToSqr(entityHitResult.location)
+            if (distanceFromEntity < range * range && (hitResult.type == HitResult.Type.MISS || hitResult.type == HitResult.Type.BLOCK && distanceFromEntity < positionVector.distanceToSqr(hitResult.location))) hitResult = entityHitResult
         }
         return hitResult
     }
