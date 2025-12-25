@@ -15,30 +15,30 @@ plugins {
     `maven-publish`
     signing
 }
-val archivesBaseName = providers.gradleProperty("archives_base_name")
-val modVersion = providers.gradleProperty("mod_version")
-val mavenGroup = providers.gradleProperty("maven_group")
-val projectDescription = providers.gradleProperty("description")
+val archivesBaseName: Provider<String> = providers.gradleProperty("archives_base_name")
+val modVersion: Provider<String> = providers.gradleProperty("mod_version")
+val mavenGroup: Provider<String> = providers.gradleProperty("maven_group")
+val projectDescription: Provider<String> = providers.gradleProperty("description")
 
-val publishingUrl = providers.gradleProperty("url")
+val publishingUrl: Provider<String> = providers.gradleProperty("url")
 
-val licenseName = providers.gradleProperty("license_name")
-val licenseUrl = providers.gradleProperty("license_url")
-val licenseDistribution = providers.gradleProperty("license_distribution")
+val licenseName: Provider<String> = providers.gradleProperty("license_name")
+val licenseUrl: Provider<String> = providers.gradleProperty("license_url")
+val licenseDistribution: Provider<String> = providers.gradleProperty("license_distribution")
 
-val developerId = providers.gradleProperty("developer_id")
-val developerName = providers.gradleProperty("developer_name")
-val developerEmail = providers.gradleProperty("developer_email")
+val developerId: Provider<String> = providers.gradleProperty("developer_id")
+val developerName: Provider<String> = providers.gradleProperty("developer_name")
+val developerEmail: Provider<String> = providers.gradleProperty("developer_email")
 
-val publishingStrategy = providers.gradleProperty("publishing_strategy")
+val publishingStrategy: Provider<String> = providers.gradleProperty("publishing_strategy")
 
-val javaVersion = libs.versions.java.map { it.toInt() }
+val javaVersion: Provider<Int> = libs.versions.java.map { it.toInt() }
 
 base.archivesName = archivesBaseName
 version = modVersion.get()
 group = mavenGroup.get()
 description = projectDescription.get()
-val shade by configurations.creating {
+val shade: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
 }

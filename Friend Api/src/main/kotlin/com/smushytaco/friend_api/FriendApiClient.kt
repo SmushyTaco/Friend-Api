@@ -226,7 +226,7 @@ object FriendApiClient : ClientModInitializer {
      */
     override fun onInitializeClient() {
         KeyBindingHelper.registerKeyBinding(KEYBINDING)
-        if (!Files.exists(filePath)) Files.createFile(filePath)
+        if (Files.notExists(filePath)) Files.createFile(filePath)
         readFriendsFromFile()
         updateFriendsList()
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandRegistrationCallback { dispatcher, _ ->
