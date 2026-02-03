@@ -40,7 +40,7 @@ import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ProjectileUtil
 import net.minecraft.world.phys.EntityHitResult
@@ -69,7 +69,7 @@ object FriendApiClient : ClientModInitializer {
     private val friends = arrayListOf<NameAndUUID>()
     private const val MOD_ID = "friend_api"
     private val KEYBINDING = KeyMapping("key.$MOD_ID.$MOD_ID", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath(MOD_ID, "category")))
+        Identifier.fromNamespaceAndPath(MOD_ID, "category")))
     /**
      * Returns an immutable snapshot of the current friend list.
      *

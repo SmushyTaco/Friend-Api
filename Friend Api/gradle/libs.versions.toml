@@ -2,11 +2,11 @@
 ##########################################################################
 # Plugins
 # Check this on https://github.com/FabricMC/fabric-loom/releases/latest/
-loom = "1.14-SNAPSHOT"
+loom = "1.15-SNAPSHOT"
 # Check this on https://kotlinlang.org/docs/releases.html
 kotlin = "2.3.0"
 # Check this on https://github.com/GradleUp/shadow/releases/latest/
-shadow = "9.3.0"
+shadow = "9.3.1"
 # Check this on https://plugins.gradle.org/plugin/com.modrinth.minotaur/
 minotaur = "2.8.10"
 # Check this on https://plugins.gradle.org/plugin/net.darkhax.curseforgegradle/
@@ -16,9 +16,9 @@ dotenv = "4.0.0"
 # Check this on https://github.com/Kotlin/dokka/releases/latest/
 dokka = "2.1.0"
 # Check this on https://plugins.gradle.org/plugin/dev.yumi.gradle.licenser/
-yumiGradleLicenser = "2.2.1"
+yumiGradleLicenser = "2.2.2"
 # Check this on https://github.com/GradleUp/nmcp/releases/latest/
-nmcp = "1.4.0"
+nmcp = "1.4.4"
 ##########################################################################
 # Java Configuration
 # The Java version the JDK will be for compiling and running code.
@@ -27,11 +27,11 @@ java = "21"
 gradleJava = "21"
 ##########################################################################
 # Dependencies
-minecraft = "1.21.10"
+minecraft = "1.21.11"
 # Check this on https://github.com/FabricMC/fabric-loader/releases/latest
 loader = "0.18.4"
 # Check this on https://modrinth.com/mod/fabric-api/versions/
-fabric-api = "0.138.4+1.21.10"
+fabric-api = "0.141.2+1.21.11"
 # Check this on https://modrinth.com/mod/fabric-language-kotlin/versions/
 fabric-language-kotlin = "1.13.8+kotlin.2.3.0"
 # Check this on https://central.sonatype.com/artifact/com.squareup.okhttp3/okhttp/
