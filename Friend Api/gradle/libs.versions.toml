@@ -4,17 +4,17 @@
 # Check this on https://github.com/FabricMC/fabric-loom/releases/latest/
 loom = "1.15-SNAPSHOT"
 # Check this on https://kotlinlang.org/docs/releases.html
-kotlin = "2.3.0"
+kotlin = "2.3.20"
 # Check this on https://github.com/GradleUp/shadow/releases/latest/
-shadow = "9.3.1"
+shadow = "9.4.0"
 # Check this on https://plugins.gradle.org/plugin/com.modrinth.minotaur/
-minotaur = "2.8.10"
+minotaur = "2.9.0"
 # Check this on https://plugins.gradle.org/plugin/net.darkhax.curseforgegradle/
-curseForgeGradle = "1.1.28"
+curseForgeGradle = "1.2.30"
 # Check this on https://plugins.gradle.org/plugin/co.uzzu.dotenv.gradle/
 dotenv = "4.0.0"
 # Check this on https://github.com/Kotlin/dokka/releases/latest/
-dokka = "2.1.0"
+dokka = "2.2.0"
 # Check this on https://plugins.gradle.org/plugin/dev.yumi.gradle.licenser/
 yumiGradleLicenser = "2.2.2"
 # Check this on https://github.com/GradleUp/nmcp/releases/latest/
@@ -22,18 +22,18 @@ nmcp = "1.4.4"
 ##########################################################################
 # Java Configuration
 # The Java version the JDK will be for compiling and running code.
-java = "21"
+java = "25"
 # The Java version the JDK will be for running Gradle.
-gradleJava = "21"
+gradleJava = "25"
 ##########################################################################
 # Dependencies
-minecraft = "1.21.11"
+minecraft = "26.1"
 # Check this on https://github.com/FabricMC/fabric-loader/releases/latest
-loader = "0.18.4"
+loader = "0.18.5"
 # Check this on https://modrinth.com/mod/fabric-api/versions/
-fabric-api = "0.141.2+1.21.11"
+fabric-api = "0.144.3+26.1"
 # Check this on https://modrinth.com/mod/fabric-language-kotlin/versions/
-fabric-language-kotlin = "1.13.8+kotlin.2.3.0"
+fabric-language-kotlin = "1.13.10+kotlin.2.3.20"
 # Check this on https://central.sonatype.com/artifact/com.squareup.okhttp3/okhttp/
 okhttp = "5.3.2"
 ##########################################################################
@@ -46,7 +46,7 @@ fabric-language-kotlin = { group = "net.fabricmc", name = "fabric-language-kotli
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 [plugins]
-loom = { id = "net.fabricmc.fabric-loom-remap", version.ref = "loom" }
+loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

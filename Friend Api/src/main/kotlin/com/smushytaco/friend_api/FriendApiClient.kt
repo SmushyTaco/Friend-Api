@@ -26,11 +26,11 @@ import com.smushytaco.friend_api.mojang_api_parser.UUIDSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
@@ -203,17 +203,17 @@ object FriendApiClient : ClientModInitializer {
             val successStatus = uuid?.let { id -> addFriend(id) } ?: addFriend(username)
             if (successStatus == null) {
                 minecraftClient.execute {
-                    clientPlayerEntity.displayClientMessage(Component.literal("§c${uuid ?: username} §4does not exist!"), true)
+                    clientPlayerEntity.sendOverlayMessage(Component.literal("§c${uuid ?: username} §4does not exist!"))
                 }
                 return@thread
             } else if (!successStatus) {
                 minecraftClient.execute {
-                    clientPlayerEntity.displayClientMessage(Component.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"), true)
+                    clientPlayerEntity.sendOverlayMessage(Component.literal("§c${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §4is already on your friend list!"))
                 }
                 return@thread
             }
             minecraftClient.execute {
-                clientPlayerEntity.displayClientMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"), false)
+                clientPlayerEntity.sendSystemMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully added to your friend list!"))
             }
         }
     }
@@ -225,7 +225,7 @@ object FriendApiClient : ClientModInitializer {
      * the client tick event used for the keybind-based friend adding.
      */
     override fun onInitializeClient() {
-        KeyBindingHelper.registerKeyBinding(KEYBINDING)
+        KeyMappingHelper.registerKeyMapping(KEYBINDING)
         if (Files.notExists(filePath)) Files.createFile(filePath)
         readFriendsFromFile()
         updateFriendsList()
@@ -233,19 +233,19 @@ object FriendApiClient : ClientModInitializer {
             val friend = dispatcher.register(literal("clientfriend")
                 .then(literal("list").executes {
                     if (friends.isEmpty()) {
-                        it.source.player.displayClientMessage(Component.literal("§4You currently have no friends on your friend list."), true)
+                        it.source.player.sendOverlayMessage(Component.literal("§4You currently have no friends on your friend list."))
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.displayClientMessage(Component.literal("§3Showing friend list:"), false)
-                    for (index in friends.indices) it.source.player.displayClientMessage(
+                    it.source.player.sendSystemMessage(Component.literal("§3Showing friend list:"))
+                    for (index in friends.indices) it.source.player.sendSystemMessage(
                         Component.literal("§3${index + 1}. ").append(
                             Component.literal("§3${friends[index].name}").copySupport(friends[index].name, Component.literal("§3Click to copy the username §b${friends[index].name}§3!"))).append(
                             Component.literal(" ")).append(Component.literal("§b[UUID]").copySupport(friends[index].id.toString(), Component.literal("§3Click to copy the §bUUID§3!"))).append(
-                            Component.literal(" ")).append(Component.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Component.literal("§3Click to remove the friend §b${friends[index].name}§3!"))), false)
+                            Component.literal(" ")).append(Component.literal("§b[Remove]").commandSupport("/clientfriend remove ${friends[index].name}", Component.literal("§3Click to remove the friend §b${friends[index].name}§3!"))))
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("add")
-                    .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                    .then(ClientCommands.argument("username", StringArgumentType.word())
                         .suggests { context, builder ->
                             @Suppress("UNCHECKED_CAST")
                             UsernameSuggestionProvider.getSuggestions(context as CommandContext<SharedSuggestionProvider>, builder)
@@ -254,7 +254,7 @@ object FriendApiClient : ClientModInitializer {
                             return@executes Command.SINGLE_SUCCESS
                         }))
                 .then(literal("remove")
-                    .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                    .then(ClientCommands.argument("username", StringArgumentType.word())
                         .suggests { context, builder ->
                             @Suppress("UNCHECKED_CAST")
                             FriendSuggestionProvider.getSuggestions(context as CommandContext<SharedSuggestionProvider>, builder)
@@ -266,19 +266,19 @@ object FriendApiClient : ClientModInitializer {
                             } catch (_: Exception) {}
                             val successStatus = uuid?.let { id -> removeFriend(id) } ?: removeFriend(username)
                             if (!successStatus) {
-                                it.source.player.displayClientMessage(Component.literal("§c${uuid ?: username} §4isn't on your friend list!"), true)
+                                it.source.player.sendOverlayMessage(Component.literal("§c${uuid ?: username} §4isn't on your friend list!"))
                                 return@executes Command.SINGLE_SUCCESS
                             }
-                            it.source.player.displayClientMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"), false)
+                            it.source.player.sendSystemMessage(Component.literal("§b${if (uuid != null) friends.find { predicate -> predicate.id == uuid }?.id ?: uuid else friends.find { predicate -> predicate.name.equals(username, true) }?.name ?: username} §3has been successfully removed from your friend list!"))
                             return@executes Command.SINGLE_SUCCESS
                         }))
                 .then(literal("clear").executes {
                     val clearCount = clearFriendList()
                     if (clearCount == 0) {
-                        it.source.player.displayClientMessage(Component.literal("§4You currently have no friends on your friend list to clear."), true)
+                        it.source.player.sendOverlayMessage(Component.literal("§4You currently have no friends on your friend list to clear."))
                         return@executes Command.SINGLE_SUCCESS
                     }
-                    it.source.player.displayClientMessage(Component.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"), false)
+                    it.source.player.sendSystemMessage(Component.literal("${if (clearCount != 1) "§3All " else ""}§b$clearCount§3 friend${if (clearCount != 1) "s have" else " has"} been cleared from the friend list!"))
                     return@executes Command.SINGLE_SUCCESS
                 })
                 .then(literal("update").executes {
@@ -286,7 +286,7 @@ object FriendApiClient : ClientModInitializer {
                     thread {
                         updateFriendsList()
                         minecraftClient.execute {
-                            it.source.player.displayClientMessage(Component.literal("§3Your friend list has been checked and updated accordingly!"), false)
+                            it.source.player.sendSystemMessage(Component.literal("§3Your friend list has been checked and updated accordingly!"))
                         }
                     }
                     return@executes Command.SINGLE_SUCCESS
